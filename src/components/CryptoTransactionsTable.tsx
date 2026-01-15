@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import type { Transaction } from "../types";
+import type { CryptoTransaction } from "../types";
 import { API_URL } from "../config";
 
 const formatCurrency = (cents: number | null) => {
@@ -33,8 +33,8 @@ const getStatusColor = (status: string) => {
   }
 };
 
-const TransactionsTable = () => {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+const CryptoTransactionsTable = () => {
+  const [transactions, setTransactions] = useState<CryptoTransaction[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -43,7 +43,7 @@ const TransactionsTable = () => {
 
       const token = localStorage.getItem("authToken");
 
-      const response = await fetch(`${API_URL}/transactions`, {
+      const response = await fetch(`${API_URL}/crypto-transactions`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -61,7 +61,7 @@ const TransactionsTable = () => {
   if (loading) {
     return (
       <div className="px-8 py-8 bg-gray-800 rounded-2xl shadow-xl">
-        <div className="text-center text-gray-400">Loading transactions...</div>
+        <div className="text-center text-gray-400">Loading crypto transactions...</div>
       </div>
     );
   }
@@ -69,7 +69,7 @@ const TransactionsTable = () => {
   if (transactions.length === 0) {
     return (
       <div className="px-8 py-8 bg-gray-800 rounded-2xl shadow-xl">
-        <div className="text-center text-gray-400">No transactions found</div>
+        <div className="text-center text-gray-400">No crypto transactions found</div>
       </div>
     );
   }
@@ -77,7 +77,7 @@ const TransactionsTable = () => {
   return (
     <div className="px-8 py-8 bg-gray-800 rounded-2xl shadow-xl">
       <h2 className="text-2xl font-bold text-white mb-6">
-        Transaction History
+        Crypto Transaction History
       </h2>
 
       <div className="overflow-x-auto">
@@ -101,6 +101,9 @@ const TransactionsTable = () => {
               </th>
               <th className="text-left py-3 px-4 text-gray-300 font-medium">
                 Transaction ID
+              </th>
+              <th className="text-left py-3 px-4 text-gray-300 font-medium">
+                NEAR Tx Hash
               </th>
               <th className="text-left py-3 px-4 text-gray-300 font-medium">
                 Date
@@ -133,7 +136,23 @@ const TransactionsTable = () => {
                   </span>
                 </td>
                 <td className="py-3 px-4 text-gray-400 text-sm font-mono">
-                  {transaction.transaction_id || "N/A"}
+                  {transaction.transacction_id ?
+                    transaction.transacction_id.substring(0, 8) + '...' :
+                    'N/A'}
+                </td>
+                <td className="py-3 px-4 text-gray-400 text-sm font-mono">
+                  {transaction.near_transaction_hash ? (
+                    <a
+                      href={`https://nearblocks.io/es/txns/${transaction.near_transaction_hash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:text-blue-300 hover:underline"
+                    >
+                      {transaction.near_transaction_hash.substring(0, 8)}...
+                    </a>
+                  ) : (
+                    'N/A'
+                  )}
                 </td>
                 <td className="py-3 px-4 text-gray-400">
                   {formatDate(transaction.created_at)}
@@ -147,4 +166,4 @@ const TransactionsTable = () => {
   );
 };
 
-export default TransactionsTable;
+export default CryptoTransactionsTable;

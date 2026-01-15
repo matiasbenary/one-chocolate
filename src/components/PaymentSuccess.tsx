@@ -1,32 +1,37 @@
 import { useEffect, useState } from 'react';
 import { API_URL } from '../config';
+import type { TransactionStatus } from '../types/index';
 
 interface PaymentSuccessProps {
   sessionId: string;
   onContinue: () => void;
 }
 
-interface TransactionStatus {
-  status: string;
-  transaction: {
+interface PaymentStatusResponse {
+  status: TransactionStatus;
+  transaction?: {
     status: string;
-  } & {
     [key: string]: unknown;
   };
 }
 
-async function getPaymentStatus(sessionId: string): Promise<TransactionStatus> {
-  const response = await fetch(`${API_URL}/status/${sessionId}`);
+async function getPaymentStatus(sessionId: string): Promise<PaymentStatusResponse> {
+  const token = localStorage.getItem('authToken');
+
+  const response = await fetch(`${API_URL}/status/${sessionId}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch payment status: ${response.statusText}`);
   }
-  console.log(response);
   return await response.json();
 }
 
 const PaymentSuccess = ({ sessionId, onContinue }: PaymentSuccessProps) => {
-  const [status, setStatus] = useState<'loading' | 'completed' | 'pending' | 'failed'>('loading');
+  const [status, setStatus] = useState<TransactionStatus>('loading');
 
   useEffect(() => {
     async function checkStatus() {
@@ -36,17 +41,13 @@ const PaymentSuccess = ({ sessionId, onContinue }: PaymentSuccessProps) => {
       try {
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
           const result = await getPaymentStatus(sessionId);
-          console.log(result);
-          
-          const currentStatus = result.status as 'loading' | 'completed' | 'pending' | 'failed';
+          setStatus(result.status);
 
-          setStatus(currentStatus);
-
-          if (currentStatus === 'completed' || currentStatus === 'failed') {
+          if (result.status === 'completed' || result.status === 'failed') {
             break;
           }
 
-          if (currentStatus === 'pending' && attempt < maxAttempts - 1) {
+          if (result.status === 'pending' && attempt < maxAttempts - 1) {
             await new Promise(resolve => setTimeout(resolve, delayMs));
           }
         }

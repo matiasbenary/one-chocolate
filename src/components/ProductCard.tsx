@@ -7,6 +7,7 @@ interface ProductCardProps {
 
 const ProductCard = ({ userEmail }: ProductCardProps) => {
   const [loading, setLoading] = useState(false);
+  const [cryptoLoading, setCryptoLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleBuyNow = async () => {
@@ -19,15 +20,18 @@ const ProductCard = ({ userEmail }: ProductCardProps) => {
     setError(null);
 
     try {
+      const token = localStorage.getItem('authToken');
+
       const response = await fetch(`${API_URL}/create-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           email: userEmail,
           productName: 'prod_Tkes10326hp9lj',
-          amount: "100", 
+          amount: "100",
         }),
       });
 
@@ -36,14 +40,53 @@ const ProductCard = ({ userEmail }: ProductCardProps) => {
       }
 
       const session = await response.json();
-        console.log(session);
       window.location.href = session.sessionUrl;
-    
-      
+
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Payment failed');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCryptoBuy = async () => {
+    if (!userEmail) {
+      setError('Please log in first');
+      return;
+    }
+
+    setCryptoLoading(true);
+    setError(null);
+
+    try {
+      const token = localStorage.getItem('authToken');
+
+      const response = await fetch(`${API_URL}/create-crypto-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          email: userEmail,
+          productName: 'Dark Chocolate',
+          amount: "100",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create crypto payment session');
+      }
+
+      const session = await response.json();
+      const paymentUrl = `${session.paymentUrl}&memo=${session.sessionId}`;
+      window.open(paymentUrl, '_blank');
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Crypto payment failed');
+    } finally {
+      setCryptoLoading(false);
     }
   };
 
@@ -60,13 +103,22 @@ const ProductCard = ({ userEmail }: ProductCardProps) => {
         {error && (
           <p className="text-red-400 text-sm mb-2">{error}</p>
         )}
-        <button
-          onClick={handleBuyNow}
-          disabled={loading}
-          className="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
-        >
-          {loading ? 'Processing...' : 'Buy Now'}
-        </button>
+        <div className="space-y-2">
+          <button
+            onClick={handleBuyNow}
+            disabled={loading || cryptoLoading}
+            className="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Processing...' : 'Buy with Card'}
+          </button>
+          <button
+            onClick={handleCryptoBuy}
+            disabled={loading || cryptoLoading}
+            className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
+          >
+            {cryptoLoading ? 'Processing...' : 'Pay with Crypto'}
+          </button>
+        </div>
       </div>
     </div>
   );
