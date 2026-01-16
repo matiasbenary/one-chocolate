@@ -22,3 +22,14 @@ export interface CryptoTransaction {
   created_at: string;
   updated_at: string;
 }
+
+export interface Product {
+  id: number;
+  name: string;
+  description: string | null;
+  price: number;
+  image_url: string | null;
+  stripe_product_id: string | null;
+  hotpay_item_id: string | null;
+  created_at: string;
+}

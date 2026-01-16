@@ -3,6 +3,7 @@ import ProductCard from "./components/ProductCard";
 import PaymentSuccess from "./components/PaymentSuccess";
 import TransactionsTable from "./components/TransactionsTable";
 import CryptoTransactionsTable from "./components/CryptoTransactionsTable";
+import ProductList from "./components/ProductList";
 import { useAuth } from "./hooks/useAuth";
 
 const App = () => {
@@ -81,6 +82,7 @@ const App = () => {
 
       {user && (
         <div className="max-w-6xl mx-auto mt-8 space-y-8">
+            <ProductList />
             <TransactionsTable />
             <CryptoTransactionsTable />
         </div>
