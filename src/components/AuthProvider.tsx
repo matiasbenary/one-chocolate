@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import type { User } from '../types/index';
+import type { User } from '../types';
 import { AuthContext } from '../contexts/AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";

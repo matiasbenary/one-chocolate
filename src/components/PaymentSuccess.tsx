@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { API_URL } from '../config';
-import type { TransactionStatus } from '../types/index';
+import type { TransactionStatus } from '../types';
 
 interface PaymentSuccessProps {
   sessionId: string;

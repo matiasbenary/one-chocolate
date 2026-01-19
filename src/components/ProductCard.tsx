@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { API_URL } from '../config';
+import type { Product } from '../types';
 
 interface ProductCardProps {
   userEmail: string | null;
+  product: Product;
 }
 
-const ProductCard = ({ userEmail }: ProductCardProps) => {
+const ProductCard = ({ userEmail, product }: ProductCardProps) => {
   const [loading, setLoading] = useState(false);
   const [cryptoLoading, setCryptoLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,8 +32,7 @@ const ProductCard = ({ userEmail }: ProductCardProps) => {
         },
         body: JSON.stringify({
           email: userEmail,
-          productName: 'prod_Tkes10326hp9lj',
-          amount: "100",
+          productId: product.id,
         }),
       });
 
@@ -70,8 +71,7 @@ const ProductCard = ({ userEmail }: ProductCardProps) => {
         },
         body: JSON.stringify({
           email: userEmail,
-          productName: 'Dark Chocolate',
-          amount: "100",
+          productId: product.id,
         }),
       });
 
@@ -92,14 +92,20 @@ const ProductCard = ({ userEmail }: ProductCardProps) => {
 
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg">
-      <img
-        src="/chocolate-product.png"
-        alt="Dark Chocolate"
-        className="w-full h-64 object-cover object-center"
-      />
+      {product.image_url ? (
+        <img
+          src={product.image_url}
+          alt={product.name}
+          className="w-full h-64 object-cover object-center"
+        />
+      ) : (
+        <div className="w-full h-64 bg-gray-700 flex items-center justify-center text-gray-400">
+          No image
+        </div>
+      )}
       <div className="p-4">
-        <h3 className="text-xl font-semibold text-white mb-2">Dark Chocolate</h3>
-        <p className="text-2xl font-bold text-indigo-400 mb-4">$1</p>
+        <h3 className="text-xl font-semibold text-white mb-2">{product.name}</h3>
+        <p className="text-2xl font-bold text-indigo-400 mb-4">${(product.price / 100).toFixed(2)}</p>
         {error && (
           <p className="text-red-400 text-sm mb-2">{error}</p>
         )}
